@@ -1,8 +1,8 @@
-void game_action(byte curButton) {
+void game_action(uint8_t curButton) {
 
   if (curButton != noButt) {
     move_player(curButton);
-    show_level();
+    show_level(curButton);
   }
   if (curButton == playQuit) {
     tft.fillScreen(BLACK);
@@ -11,14 +11,14 @@ void game_action(byte curButton) {
   }
   if (curButton == back) {
     undo_move();
-    show_level();
+    show_level(curButton);
   }
 }
 
-void move_player(byte curButton) {
+void move_player(uint8_t curButton) {
   int8_t dx = 0, dy = 0;
   CellChange changes[4];
-  byte change_count = 0;
+  uint8_t change_count = 0;
 
   switch (curButton) {
     case upButt: dy = -1; break;
@@ -28,12 +28,12 @@ void move_player(byte curButton) {
     default: return;
   }
 
-  byte target_x = player_x + dx;
-  byte target_y = player_y + dy;
+  uint8_t target_x = player_x + dx;
+  uint8_t target_y = player_y + dy;
 
   if (target_x >= size_x || target_y >= size_y) return;
 
-  byte target_cell = level[target_x][target_y];
+  uint8_t target_cell = level[target_x][target_y];
 
   bool is_player_on_place = (level[player_x][player_y] == MAN_PLACE);
 
@@ -53,12 +53,12 @@ void move_player(byte curButton) {
 
   // если ящик
   else if (target_cell == BOX || target_cell == BOX_PLACE) {
-    byte beyond_x = target_x + dx;
-    byte beyond_y = target_y + dy;
+    uint8_t beyond_x = target_x + dx;
+    uint8_t beyond_y = target_y + dy;
 
     if (beyond_x >= size_x || beyond_y >= size_y) return;
 
-    byte beyond_cell = level[beyond_x][beyond_y];
+    uint8_t beyond_cell = level[beyond_x][beyond_y];
 
     if (beyond_cell == VOID || beyond_cell == PLACE) {
       // двигаем ящик
@@ -90,7 +90,9 @@ void draw_cell(int16_t x, int16_t y, const uint16_t* bitmap, bool transparent = 
   tft.pushColors((const uint8_t*)bitmap, cell_size * cell_size, 1, transparent);
 }
 
-void show_level() {
+
+
+void show_level(uint8_t curButton) {
   tft.fillScreen(BLACK);
 
   const uint8_t cell_size = 15;
@@ -103,12 +105,12 @@ void show_level() {
 
   uint8_t box_count = 0;
 
-  for (byte y = 0; y < size_y; y++) {
-    for (byte x = 0; x < size_x; x++) {
-      int16_t x_pos = (x - player_x) * cell_size + center_x;
-      int16_t y_pos = (y - player_y) * cell_size + center_y;
+  for (uint8_t y = 0; y < size_y; y++) {
+    for (uint8_t x = 0; x < size_x; x++) {
+      uint16_t x_pos = (x - player_x) * cell_size + center_x;
+      uint16_t y_pos = (y - player_y) * cell_size + center_y;
 
-      if (x_pos + cell_size < 0 || x_pos >= screen_w || y_pos + cell_size < 0 || y_pos >= screen_h) {
+      if (x_pos >= screen_w || y_pos >= screen_h) {
         continue;
       }
 
@@ -134,7 +136,10 @@ void show_level() {
 
         case MAN:
         case MAN_PLACE:
-          draw_cell(x_pos, y_pos, bulldozer);
+          if(curButton == rightButt) draw_cell(x_pos, y_pos, bulldozer_90); 
+          else if(curButton == downButt) draw_cell(x_pos, y_pos, bulldozer_180);
+          else if(curButton == leftButt) draw_cell(x_pos, y_pos, bulldozer_270);
+          else draw_cell(x_pos, y_pos, bulldozer);
           break;
 
         default:
@@ -151,8 +156,8 @@ void show_level() {
   }
 }
 
-byte load_bit(byte x) {
-  byte bufer = 0;
+uint8_t load_bit(uint8_t x) {
+  uint8_t bufer = 0;
   num_level = 0;
   // первое чтение архива
   if (big_bufer == 0) {
@@ -162,7 +167,7 @@ byte load_bit(byte x) {
   }
 
   // побитовое чтение из буфера
-  for (byte i = 0; i < x; i++) {
+  for (uint8_t i = 0; i < x; i++) {
     bufer = (bufer << 1) | ((big_bufer & 0x8000) ? 1 : 0);
     big_bufer <<= 1;
     bit_counter++;
@@ -178,6 +183,7 @@ byte load_bit(byte x) {
 }
 
 void load_level() {
+  clear_undo_buffer();
   big_bufer = 0;
   byte_index = 0;
   bit_counter = 0;
@@ -192,22 +198,22 @@ void load_level() {
   int m = 0;
 
   while (m < total_cells) {
-    byte n_replay;
+    uint8_t n_replay;
 
     // признак повтора
     if (load_bit(1)) {
-      byte repeat_code = load_bit(3);  // 3 бита для количества повторений
+      uint8_t repeat_code = load_bit(3);  // 3 бита для количества повторений
       n_replay = repeat_code + 2;      // от 2 до 9
     } else {
       n_replay = 1;
     }
 
     // объект: 2 бита
-    byte element = load_bit(2);
+    uint8_t element = load_bit(2);
 
-    for (byte i = 0; i < n_replay; i++) {
-      byte x = m % size_x;
-      byte y = m / size_x;
+    for (uint8_t i = 0; i < n_replay; i++) {
+      uint8_t x = m % size_x;
+      uint8_t y = m / size_x;
       if (y < size_y) {
         level[x][y] = element;
       }

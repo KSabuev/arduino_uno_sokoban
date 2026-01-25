@@ -1,5 +1,5 @@
-byte ReadKey() {
-  int currentValue = analogRead(BUTTON_PIN);
+uint8_t ReadKey() {
+  uint16_t currentValue = analogRead(BUTTON_PIN);
 
   if (abs(currentValue - prevValue) > 10) {
     debounceTime = millis();

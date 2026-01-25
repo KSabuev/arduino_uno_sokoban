@@ -7,19 +7,17 @@ const bool menuMode = true;
 const bool gameMode = false;
 
 bool mode = menuMode;
-byte menuIndex = 0;
+uint8_t menuIndex = 0;
 
-byte scrollOffset = 0;    // смещение прокрутки
-const byte visibleCount = 4; // сколько уровней влезает на экран
-
-
+uint8_t scrollOffset = 0;    // смещение прокрутки
+const uint8_t visibleCount = 4; // сколько уровней влезает на экран
 
 // game
-byte level[25][25] = {};
-byte num_level = 0;
-int player_x;
-int player_y;
-byte curLevel = 0; //номер текущего уровня
+uint8_t level[25][25] = {};
+uint8_t num_level = 0;
+uint8_t player_x;
+uint8_t player_y;
+uint8_t curLevel = 0; //номер текущего уровня
 
 uint8_t size_level, size_x, size_y, man_x, man_y;
 volatile uint16_t big_bufer = 0;
@@ -35,22 +33,22 @@ volatile uint8_t bit_counter = 0;
 #define BOX_PLACE   6   // ящик на палете
 
 // undo
-const byte UNDO_DEPTH = 10;
-const byte MAX_CHANGES = 4;
+const uint8_t UNDO_DEPTH = 10;
+const uint8_t MAX_CHANGES = 4;
 
 struct CellChange {
-  byte x, y;
-  byte prev_value;
+  uint8_t x, y;
+  uint8_t prev_value;
 };
 
 struct MoveSnapshot {
   CellChange changes[MAX_CHANGES];
-  byte count;
+  uint8_t count;
 };
 
 MoveSnapshot undo_buffer[UNDO_DEPTH];
-byte undo_pos = 0;
-byte undo_size = 0;
+uint8_t undo_pos = 0;
+uint8_t undo_size = 0;
 
 // collor
 #define BLACK 0x0000
@@ -89,7 +87,7 @@ void setup() {
 }
 
 void loop() {
-  byte curButton = ReadKey();
+  uint8_t curButton = ReadKey();
 
   switch (mode) {
     case (menuMode):

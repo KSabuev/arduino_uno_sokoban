@@ -1,8 +1,8 @@
-void save_move(CellChange* changes, byte count) {
+void save_move(CellChange* changes, uint8_t count) {
   MoveSnapshot& snap = undo_buffer[undo_pos];
   snap.count = count;
 
-  for (byte i = 0; i < count; i++) {
+  for (uint8_t i = 0; i < count; i++) {
     snap.changes[i] = changes[i];
   }
 
@@ -16,15 +16,15 @@ bool undo_move() {
   undo_pos = (undo_pos + UNDO_DEPTH - 1) % UNDO_DEPTH;
   MoveSnapshot& snap = undo_buffer[undo_pos];
 
-  for (byte i = 0; i < snap.count; i++) {
-    byte x = snap.changes[i].x;
-    byte y = snap.changes[i].y;
+  for (uint8_t i = 0; i < snap.count; i++) {
+    uint8_t x = snap.changes[i].x;
+    uint8_t y = snap.changes[i].y;
     level[x][y] = snap.changes[i].prev_value;
   }
 
   // ищем игрока
-  for (byte y = 0; y < size_y; y++) {
-    for (byte x = 0; x < size_x; x++) {
+  for (uint8_t y = 0; y < size_y; y++) {
+    for (uint8_t x = 0; x < size_x; x++) {
       if (level[x][y] == MAN || level[x][y] == MAN_PLACE) {
         player_x = x;
         player_y = y;
@@ -36,4 +36,8 @@ bool undo_move() {
   undo_size--;
 
   return true;
+}
+
+void clear_undo_buffer() {
+  undo_size = 0;
 }
