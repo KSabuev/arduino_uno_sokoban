@@ -83,15 +83,13 @@ void move_player(uint8_t curButton) {
   }
 }
 
-void draw_cell(int16_t x, int16_t y, const uint16_t* bitmap, bool transparent = false) {
+void draw_cell(int16_t x, int16_t y, const uint16_t *bitmap, bool transparent = false) {
   const uint8_t cell_size = 15;
   const uint8_t cell_end = cell_size - 1;
 
   tft.setAddrWindow(x, y, x + cell_end, y + cell_end);
-  tft.pushColors((const uint8_t*)bitmap, cell_size * cell_size, 1, transparent);
+  tft.pushColors((const uint8_t *)bitmap, cell_size * cell_size, 1, transparent);
 }
-
-
 
 void show_level(uint8_t curButton) {
   tft.fillScreen(BLACK);
@@ -137,9 +135,9 @@ void show_level(uint8_t curButton) {
 
         case MAN:
         case MAN_PLACE:
-          if(curButton == rightButt) draw_cell(x_pos, y_pos, bulldozer_90); 
-          else if(curButton == downButt) draw_cell(x_pos, y_pos, bulldozer_180);
-          else if(curButton == leftButt) draw_cell(x_pos, y_pos, bulldozer_270);
+          if (curButton == rightButt) draw_cell(x_pos, y_pos, bulldozer_90);
+          else if (curButton == downButt) draw_cell(x_pos, y_pos, bulldozer_180);
+          else if (curButton == leftButt) draw_cell(x_pos, y_pos, bulldozer_270);
           else draw_cell(x_pos, y_pos, bulldozer);
           break;
 
@@ -153,94 +151,95 @@ void show_level(uint8_t curButton) {
   if (box_count == 0) {
     tft.setTextSize(3);
     tft.setCursor(screen_w / 2 - 60, screen_h / 2 - 10);
-    tft.print("VICTORI! " + (String)menuIndex);
+    tft.print("VICTORY! " + (String)menuIndex);
   }
 }
 
-uint8_t load_bit(uint8_t x, uint8_t num_level) {
-  uint8_t bufer = 0;
-  // первое чтение архива
-  if (big_bufer == 0) {
-    big_bufer = (pgm_read_byte(&level_array[num_level][0]) << 8) | pgm_read_byte(&level_array[num_level][1]);
-    byte_index = 1;
-    bit_counter = 0;
-  }
-
-  // побитовое чтение из буфера
-  for (uint8_t i = 0; i < x; i++) {
-    bufer = (bufer << 1) | ((big_bufer & 0x8000) ? 1 : 0);
-    big_bufer <<= 1;
-    bit_counter++;
-
-    if (bit_counter == 8) {
-      byte_index++;
-      big_bufer |= pgm_read_byte(&level_array[num_level][byte_index]);
-      bit_counter = 0;
+struct LevelDecoder {
+    const uint8_t* data;
+    uint16_t buffer;
+    uint8_t bit_pos;
+    
+    LevelDecoder(uint8_t level_num) {
+        data = (const uint8_t*)pgm_read_ptr(&level_array[level_num]);
+        buffer = (pgm_read_byte(data) << 8) | pgm_read_byte(data + 1);
+        data += 2;
+        bit_pos = 0;
     }
-  }
-
-  return bufer;
-}
+    
+    uint8_t read_bits(uint8_t n) {
+        uint8_t result = 0;
+        
+        for (uint8_t i = 0; i < n; i++) {
+            result = (result << 1) | ((buffer & 0x8000) ? 1 : 0);
+            buffer <<= 1;
+            bit_pos++;
+            
+            if (bit_pos == 8) {
+                buffer |= pgm_read_byte(data++);
+                bit_pos = 0;
+            }
+        }
+        
+        return result;
+    }
+};
 
 void load_level(uint8_t num_level) {
-  clear_undo_buffer();
-  clearLevel();
-  printLevel();
+    clear_undo_buffer();
+    clearLevel();
 
-  big_bufer = 0;
-  byte_index = 0;
-  bit_counter = 0;
+    // Создаем декодер для уровня
+    LevelDecoder decoder(num_level);
 
-  size_x = load_bit(8, num_level);
-  size_y = load_bit(8, num_level);
+    size_x = decoder.read_bits(8);
+    size_y = decoder.read_bits(8);
+    player_x = decoder.read_bits(8);
+    player_y = decoder.read_bits(8);
 
-  player_x = load_bit(8, num_level);
-  player_y = load_bit(8, num_level);
+    int total_cells = size_x * size_y;
+    int m = 0;
 
-  int total_cells = size_x * size_y;
-  int m = 0;
+    while (m < total_cells) {
+        uint8_t n_replay;
 
-  while (m < total_cells) {
-    uint8_t n_replay;
+        // признак повтора
+        if (decoder.read_bits(1)) {
+            uint8_t repeat_code = decoder.read_bits(3);  // 3 бита для количества повторений
+            n_replay = repeat_code + 2;                  // от 2 до 9
+        } else {
+            n_replay = 1;
+        }
 
-    // признак повтора
-    if (load_bit(1, num_level)) {
-      uint8_t repeat_code = load_bit(3, num_level);  // 3 бита для количества повторений
-      n_replay = repeat_code + 2;      // от 2 до 9
-    } else {
-      n_replay = 1;
+        // объект: 2 бита
+        uint8_t element = decoder.read_bits(2);
+
+        for (uint8_t i = 0; i < n_replay; i++) {
+            uint8_t x = m % size_x;
+            uint8_t y = m / size_x;
+            if (y < size_y) {
+                level[x][y] = element;
+            }
+            m++;
+        }
     }
 
-    // объект: 2 бита
-    uint8_t element = load_bit(2, num_level);
-
-    for (uint8_t i = 0; i < n_replay; i++) {
-      uint8_t x = m % size_x;
-      uint8_t y = m / size_x;
-      if (y < size_y) {
-        level[x][y] = element;
-      }
-      m++;
-    }
-  }
-
-  // установка игрока
-  level[player_x][player_y] = 4;
-  printLevel();
+    // установка игрока
+    level[player_x][player_y] = MAN;
 }
 
-void printLevel() {
-  Serial.println("=== Level Array ===");
-  for (int y = 0; y < 20; y++) {
-    for (int x = 0; x < 20; x++) {
-      Serial.print(level[x][y]);
-      Serial.print(" ");
-    }
-    Serial.println();
-  }
-  Serial.println("===================");
-}
+// void printLevel() {
+//   Serial.println("=== Level Array ===");
+//   for (int y = 0; y < 20; y++) {
+//     for (int x = 0; x < 20; x++) {
+//       Serial.print(level[x][y]);
+//       Serial.print(" ");
+//     }
+//     Serial.println();
+//   }
+//   Serial.println("===================");
+// }
 
 void clearLevel() {
-  memset(level, 0, 20*20); // Установит все байты в 0
+  memset(level, 0, MAX_LEVEL_SIZE * MAX_LEVEL_SIZE);  // Установит все байты в 0
 }

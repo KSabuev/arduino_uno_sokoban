@@ -21,7 +21,7 @@ void menu_action(uint8_t curButton) {
   if (curButton == playQuit) {
     mode = !mode;
     tft.fillScreen(BLACK);
-    load_level(0);
+    load_level(menuIndex);
     show_level(curButton);
     return;
   }

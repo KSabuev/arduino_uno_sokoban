@@ -8,28 +8,26 @@ MCUFRIEND_kbv tft;
 
 bool mode = menuMode;
 volatile uint8_t menuIndex = 0;
-bool flagMenu =false;
+bool flagMenu = false;
 
-uint8_t scrollOffset = 0;    // смещение прокрутки
-const uint8_t visibleCount = 4; // сколько уровней влезает на экран
+uint8_t scrollOffset = 0;        // смещение прокрутки
+const uint8_t visibleCount = 4;  // сколько уровней влезает на экран
 
 // game
-uint8_t level[25][25] = {};
+#define MAX_LEVEL_SIZE 25
+uint8_t level[MAX_LEVEL_SIZE][MAX_LEVEL_SIZE] = {};
 uint8_t player_x;
 uint8_t player_y;
 
-uint8_t size_level, size_x, size_y, man_x, man_y;
-volatile uint16_t big_bufer = 0;
-volatile uint8_t byte_index = 0;
-volatile uint8_t bit_counter = 0;
+uint8_t size_x, size_y, man_x, man_y;
 
-#define VOID 0   // пусто
-#define WALL 1   // стена
-#define BOX 2    // коробка
-#define PLACE 3  // палет
-#define MAN 4    // игрок
-#define MAN_PLACE   5   // игрок на палете
-#define BOX_PLACE   6   // ящик на палете
+#define VOID 0       // пусто
+#define WALL 1       // стена
+#define BOX 2        // коробка
+#define PLACE 3      // палет
+#define MAN 4        // игрок
+#define MAN_PLACE 5  // игрок на палете
+#define BOX_PLACE 6  // ящик на палете
 
 // undo
 const uint8_t UNDO_DEPTH = 10;
@@ -75,8 +73,6 @@ uint8_t undo_size = 0;
 void setup() {
   Serial.begin(9600);
   // uint16_t ID = tft.readID();
-  //     Serial.println(ID);
-
   tft.begin(37664);
   tft.fillScreen(BLACK);
   tft.setRotation(1);
@@ -94,5 +90,4 @@ void loop() {
       game_action(curButton);
       break;
   }
-  }
-
+}
