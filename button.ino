@@ -1,4 +1,8 @@
 uint8_t ReadKey() {
+  static bool buttonPressed = false;
+  static int prevValue = 0;
+  static unsigned long debounceTime = 0;  // Время последнего изменения состояния
+  
   uint16_t currentValue = analogRead(BUTTON_PIN);
 
   if (abs(currentValue - prevValue) > 10) {

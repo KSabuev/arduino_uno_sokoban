@@ -3,21 +3,20 @@
 MCUFRIEND_kbv tft;
 
 // menu
-const bool menuMode = true;
-const bool gameMode = false;
+#define menuMode true
+#define gameMode false
 
 bool mode = menuMode;
-uint8_t menuIndex = 0;
+volatile uint8_t menuIndex = 0;
+bool flagMenu =false;
 
 uint8_t scrollOffset = 0;    // смещение прокрутки
 const uint8_t visibleCount = 4; // сколько уровней влезает на экран
 
 // game
 uint8_t level[25][25] = {};
-uint8_t num_level = 0;
 uint8_t player_x;
 uint8_t player_y;
-uint8_t curLevel = 0; //номер текущего уровня
 
 uint8_t size_level, size_x, size_y, man_x, man_y;
 volatile uint16_t big_bufer = 0;
@@ -58,10 +57,6 @@ uint8_t undo_size = 0;
 // button
 #define BUTTON_PIN A5
 
-bool buttonPressed = false;
-int prevValue = 0;
-unsigned long debounceTime = 0;  // Время последнего изменения состояния
-
 #define adc_key_1 980
 #define adc_key_2 780
 #define adc_key_3 600
@@ -79,8 +74,10 @@ unsigned long debounceTime = 0;  // Время последнего измене
 
 void setup() {
   Serial.begin(9600);
-  uint16_t ID = tft.readID();
-  tft.begin(ID);
+  // uint16_t ID = tft.readID();
+  //     Serial.println(ID);
+
+  tft.begin(37664);
   tft.fillScreen(BLACK);
   tft.setRotation(1);
   tft.setTextColor(BLUE);

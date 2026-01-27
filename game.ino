@@ -6,6 +6,7 @@ void game_action(uint8_t curButton) {
   }
   if (curButton == playQuit) {
     tft.fillScreen(BLACK);
+    flagMenu = false;
     mode = !mode;
     Serial.println("перешли в меню");
   }
@@ -152,13 +153,12 @@ void show_level(uint8_t curButton) {
   if (box_count == 0) {
     tft.setTextSize(3);
     tft.setCursor(screen_w / 2 - 60, screen_h / 2 - 10);
-    tft.print("VIKTORI!");
+    tft.print("VICTORI! " + (String)menuIndex);
   }
 }
 
-uint8_t load_bit(uint8_t x) {
+uint8_t load_bit(uint8_t x, uint8_t num_level) {
   uint8_t bufer = 0;
-  num_level = 0;
   // первое чтение архива
   if (big_bufer == 0) {
     big_bufer = (pgm_read_byte(&level_array[num_level][0]) << 8) | pgm_read_byte(&level_array[num_level][1]);
@@ -182,17 +182,20 @@ uint8_t load_bit(uint8_t x) {
   return bufer;
 }
 
-void load_level() {
+void load_level(uint8_t num_level) {
   clear_undo_buffer();
+  clearLevel();
+  printLevel();
+
   big_bufer = 0;
   byte_index = 0;
   bit_counter = 0;
 
-  size_x = load_bit(8);
-  size_y = load_bit(8);
+  size_x = load_bit(8, num_level);
+  size_y = load_bit(8, num_level);
 
-  player_x = load_bit(8);
-  player_y = load_bit(8);
+  player_x = load_bit(8, num_level);
+  player_y = load_bit(8, num_level);
 
   int total_cells = size_x * size_y;
   int m = 0;
@@ -201,15 +204,15 @@ void load_level() {
     uint8_t n_replay;
 
     // признак повтора
-    if (load_bit(1)) {
-      uint8_t repeat_code = load_bit(3);  // 3 бита для количества повторений
+    if (load_bit(1, num_level)) {
+      uint8_t repeat_code = load_bit(3, num_level);  // 3 бита для количества повторений
       n_replay = repeat_code + 2;      // от 2 до 9
     } else {
       n_replay = 1;
     }
 
     // объект: 2 бита
-    uint8_t element = load_bit(2);
+    uint8_t element = load_bit(2, num_level);
 
     for (uint8_t i = 0; i < n_replay; i++) {
       uint8_t x = m % size_x;
@@ -223,4 +226,21 @@ void load_level() {
 
   // установка игрока
   level[player_x][player_y] = 4;
+  printLevel();
+}
+
+void printLevel() {
+  Serial.println("=== Level Array ===");
+  for (int y = 0; y < 20; y++) {
+    for (int x = 0; x < 20; x++) {
+      Serial.print(level[x][y]);
+      Serial.print(" ");
+    }
+    Serial.println();
+  }
+  Serial.println("===================");
+}
+
+void clearLevel() {
+  memset(level, 0, 20*20); // Установит все байты в 0
 }
