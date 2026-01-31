@@ -88,7 +88,7 @@ void draw_cell(int16_t x, int16_t y, const uint16_t *bitmap, bool transparent = 
   const uint8_t cell_end = cell_size - 1;
 
   tft.setAddrWindow(x, y, x + cell_end, y + cell_end);
-  tft.pushColors((const uint8_t *)bitmap, cell_size * cell_size, 1, transparent);
+  tft.pushColors((const uint8_t *)bitmap, cell_size * cell_size, 1);
 }
 
 void show_level(uint8_t curButton) {

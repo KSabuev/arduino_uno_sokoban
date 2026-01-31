@@ -72,8 +72,7 @@ uint8_t undo_size = 0;
 
 void setup() {
   Serial.begin(9600);
-  // uint16_t ID = tft.readID();
-  tft.begin(37664);
+  tft.begin();
   tft.fillScreen(BLACK);
   tft.setRotation(1);
   tft.setTextColor(BLUE);

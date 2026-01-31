@@ -44,7 +44,7 @@ void menu_action(uint8_t curButton) {
       tft.setTextColor(levelNumber == menuIndex ? GREEN : BLUE);
       tft.setCursor(40, (i + 2) * 35);  // (i + 2) — смещение вниз
       tft.print("Level ");
-      tft.print(levelNumber);
+      tft.print((String)levelNumber);
     }
 
     // Запоминаем последний выбранный уровень
