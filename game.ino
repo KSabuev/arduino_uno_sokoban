@@ -18,7 +18,7 @@ void game_action(uint8_t curButton) {
 
 void move_player(uint8_t curButton) {
   int8_t dx = 0, dy = 0;
-  CellChange changes[4];
+  int16_t changes[4];
   uint8_t change_count = 0;
 
   switch (curButton) {
@@ -41,11 +41,11 @@ void move_player(uint8_t curButton) {
   // пусто или место под ящик
   if (target_cell == VOID || target_cell == PLACE) {
     // освобождаем текущую клетку
-    changes[change_count++] = { player_x, player_y, level[player_x][player_y] };
+    changes[change_count++] = pack_change(player_x, player_y, level[player_x][player_y]);
     level[player_x][player_y] = is_player_on_place ? PLACE : VOID;
 
     // ставим игрока
-    changes[change_count++] = { target_x, target_y, level[target_x][target_y] };
+    changes[change_count++] = pack_change(target_x, target_y, level[target_x][target_y]);
     level[target_x][target_y] = (target_cell == PLACE) ? MAN_PLACE : MAN;
 
     player_x = target_x;
@@ -63,15 +63,15 @@ void move_player(uint8_t curButton) {
 
     if (beyond_cell == VOID || beyond_cell == PLACE) {
       // двигаем ящик
-      changes[change_count++] = { beyond_x, beyond_y, level[beyond_x][beyond_y] };
+      changes[change_count++] = pack_change(beyond_x, beyond_y, level[beyond_x][beyond_y]);
       level[beyond_x][beyond_y] = (beyond_cell == PLACE) ? BOX_PLACE : BOX;
 
       // освобождаем игрока
-      changes[change_count++] = { player_x, player_y, level[player_x][player_y] };
+      changes[change_count++] = pack_change(player_x, player_y, level[player_x][player_y]);
       level[player_x][player_y] = is_player_on_place ? PLACE : VOID;
 
       // ставим игрока
-      changes[change_count++] = { target_x, target_y, level[target_x][target_y] };
+      changes[change_count++] = pack_change(target_x, target_y, level[target_x][target_y]);
       level[target_x][target_y] = (target_cell == BOX_PLACE) ? MAN_PLACE : MAN;
 
       player_x = target_x;

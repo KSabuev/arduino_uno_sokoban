@@ -30,7 +30,6 @@ void menu_action(uint8_t curButton) {
   if (lastMenuIndex != menuIndex || !flagMenu) {
     tft.fillScreen(BLACK);  // Очищаем экран
     flagMenu = true;
-    // Заголовок меню
     tft.setTextColor(BLUE);
     tft.setCursor(100, 20);
     tft.setTextSize(3);

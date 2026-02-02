@@ -14,7 +14,7 @@ uint8_t scrollOffset = 0;        // смещение прокрутки
 const uint8_t visibleCount = 4;  // сколько уровней влезает на экран
 
 // game
-#define MAX_LEVEL_SIZE 25
+#define MAX_LEVEL_SIZE 20
 uint8_t level[MAX_LEVEL_SIZE][MAX_LEVEL_SIZE] = {};
 uint8_t player_x;
 uint8_t player_y;
@@ -30,16 +30,10 @@ uint8_t size_x, size_y, man_x, man_y;
 #define BOX_PLACE 6  // ящик на палете
 
 // undo
-const uint8_t UNDO_DEPTH = 10;
-const uint8_t MAX_CHANGES = 4;
-
-struct CellChange {
-  uint8_t x, y;
-  uint8_t prev_value;
-};
+const uint8_t UNDO_DEPTH = 20;
 
 struct MoveSnapshot {
-  CellChange changes[MAX_CHANGES];
+  uint16_t changes[4];
   uint8_t count;
 };
 
