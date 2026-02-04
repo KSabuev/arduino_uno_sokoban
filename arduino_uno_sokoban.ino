@@ -7,7 +7,7 @@ MCUFRIEND_kbv tft;
 #define gameMode false
 
 bool mode = menuMode;
-volatile uint8_t menuIndex = 0;
+volatile uint16_t menuIndex = 0;
 bool flagMenu = false;
 
 uint8_t scrollOffset = 0;        // смещение прокрутки
@@ -49,13 +49,6 @@ uint8_t undo_size = 0;
 // button
 #define BUTTON_PIN A5
 
-#define adc_key_1 980
-#define adc_key_2 780
-#define adc_key_3 600
-#define adc_key_4 410
-#define adc_key_5 240
-#define adc_key_6 130
-
 #define noButt 0
 #define playQuit 1
 #define back 2
@@ -65,7 +58,7 @@ uint8_t undo_size = 0;
 #define upButt 6
 
 void setup() {
-  Serial.begin(9600);
+  // Serial.begin(9600);
   tft.begin();
   tft.fillScreen(BLACK);
   tft.setRotation(1);

@@ -8,7 +8,6 @@ void game_action(uint8_t curButton) {
     tft.fillScreen(BLACK);
     flagMenu = false;
     mode = !mode;
-    Serial.println("перешли в меню");
   }
   if (curButton == back) {
     undo_move();
@@ -160,7 +159,7 @@ struct LevelDecoder {
     uint16_t buffer;
     uint8_t bit_pos;
     
-    LevelDecoder(uint8_t level_num) {
+    LevelDecoder(uint16_t level_num) {
         data = (const uint8_t*)pgm_read_ptr(&level_array[level_num]);
         buffer = (pgm_read_byte(data) << 8) | pgm_read_byte(data + 1);
         data += 2;

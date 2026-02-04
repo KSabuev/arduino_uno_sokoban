@@ -1,6 +1,6 @@
 void menu_action(uint8_t curButton) {
-  const uint8_t maxIndex = sizeof(level_array) / sizeof(level_array[0]) - 1;
-  static uint8_t lastMenuIndex;
+  const uint16_t maxIndex = sizeof(level_array) - 1;
+  static uint16_t lastMenuIndex;
 
   // Обработка кнопок
   if (curButton == downButt && menuIndex < maxIndex) {
