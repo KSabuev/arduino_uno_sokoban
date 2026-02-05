@@ -7,11 +7,8 @@ MCUFRIEND_kbv tft;
 #define gameMode false
 
 bool mode = menuMode;
-volatile uint16_t menuIndex = 0;
+volatile int16_t menuIndex = 0;
 bool flagMenu = false;
-
-uint8_t scrollOffset = 0;        // смещение прокрутки
-const uint8_t visibleCount = 4;  // сколько уровней влезает на экран
 
 // game
 #define MAX_LEVEL_SIZE 20
