@@ -1,6 +1,6 @@
-#include "MCUFRIEND_kbv.h"
+#include "ILI932X_light.h"
 #include "bitmapRGB.h"
-MCUFRIEND_kbv tft;
+ILI932X_light tft;
 
 // menu
 #define menuMode true
