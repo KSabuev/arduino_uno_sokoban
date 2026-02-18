@@ -11,6 +11,7 @@ volatile int16_t menuIndex = 0;
 bool flagMenu = false;
 
 // game
+#define CELL_SIZE 15
 #define MAX_LEVEL_SIZE 20
 uint8_t level[MAX_LEVEL_SIZE][MAX_LEVEL_SIZE] = {};
 uint8_t player_x;
@@ -27,10 +28,10 @@ uint8_t size_x, size_y, man_x, man_y;
 #define BOX_PLACE 6  // ящик на палете
 
 // undo
-const uint8_t UNDO_DEPTH = 20;
+const uint8_t UNDO_DEPTH = 50;
 
 struct MoveSnapshot {
-  uint16_t changes[4];
+  uint16_t changes[3];
   uint8_t count;
 };
 

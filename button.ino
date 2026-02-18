@@ -24,10 +24,10 @@ uint8_t ReadKey() {
   if (currentButton != noButt) {
     if (heldButton == noButt) {
       heldButton = currentButton;
-      nextPressTime = now + 500;
+      nextPressTime = now + 200;
       return currentButton;
     } else if (currentButton == heldButton && now >= nextPressTime) {
-      nextPressTime = now + 500;
+      nextPressTime = now + 200;
       return currentButton;
     }
   } else {

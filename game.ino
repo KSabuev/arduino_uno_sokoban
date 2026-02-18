@@ -2,7 +2,11 @@ void game_action(uint8_t curButton) {
 
   if (curButton != noButt) {
     move_player(curButton);
-    show_level(curButton);
+    if (undo_size > 0) {
+      update_level(curButton);
+    } else {
+      show_level(curButton);
+    }
   }
   if (curButton == playQuit) {
     tft.fillScreen(BLACK);
@@ -82,75 +86,66 @@ void move_player(uint8_t curButton) {
   }
 }
 
-void draw_cell(int16_t x, int16_t y, const uint16_t *bitmap, bool transparent = false) {
-  const uint8_t cell_size = 15;
-  const uint8_t cell_end = cell_size - 1;
+void draw_bitmap(int16_t x, int16_t y, const uint16_t *bitmap, bool transparent = false) {
+  const uint8_t cell_end = CELL_SIZE - 1;
 
   tft.setAddrWindow(x, y, x + cell_end, y + cell_end);
-  tft.pushColors((const uint8_t *)bitmap, cell_size * cell_size, 1);
+  tft.pushColors((const uint8_t *)bitmap, CELL_SIZE * CELL_SIZE, 1);
+}
+
+void draw_cell(uint16_t x_pos, uint16_t y_pos, uint8_t cell_type, uint8_t curButton) {
+  switch (cell_type) {
+    case WALL:
+      draw_bitmap(x_pos, y_pos, wall);
+      break;
+    case PLACE:
+      draw_bitmap(x_pos, y_pos, place);
+      break;
+    case BOX:
+      draw_bitmap(x_pos, y_pos, box);
+      break;
+    case BOX_PLACE:
+      draw_bitmap(x_pos, y_pos, box, true);
+      break;
+    case MAN:
+    case MAN_PLACE:
+      if (curButton == rightButt) draw_bitmap(x_pos, y_pos, bulldozer_90);
+      else if (curButton == downButt) draw_bitmap(x_pos, y_pos, bulldozer_180);
+      else if (curButton == leftButt) draw_bitmap(x_pos, y_pos, bulldozer_270);
+      else draw_bitmap(x_pos, y_pos, bulldozer);
+      break;
+    default:
+      tft.fillRect(x_pos, y_pos, CELL_SIZE, CELL_SIZE, BLACK);
+      break;
+  }
 }
 
 void show_level(uint8_t curButton) {
-  tft.fillScreen(BLACK);
-
-  const uint8_t cell_size = 15;
-
-  const uint16_t screen_w = tft.width();   // 240
-  const uint16_t screen_h = tft.height();  // 320
-
-  const int16_t center_x = screen_w / 2 - cell_size / 2;
-  const int16_t center_y = screen_h / 2 - cell_size / 2;
-
   uint8_t box_count = 0;
 
   for (uint8_t y = 0; y < size_y; y++) {
     for (uint8_t x = 0; x < size_x; x++) {
-      uint16_t x_pos = (x - player_x) * cell_size + center_x;
-      uint16_t y_pos = (y - player_y) * cell_size + center_y;
-
-      if (x_pos >= screen_w || y_pos >= screen_h) {
-        continue;
-      }
-
-      uint8_t cell = level[x][y];
-
-      switch (cell) {
-        case WALL:
-          draw_cell(x_pos, y_pos, wall);
-          break;
-
-        case PLACE:
-          draw_cell(x_pos, y_pos, place);
-          break;
-
-        case BOX:
-          box_count++;
-          draw_cell(x_pos, y_pos, box);
-          break;
-
-        case BOX_PLACE:
-          draw_cell(x_pos, y_pos, box, true);
-          break;
-
-        case MAN:
-        case MAN_PLACE:
-          if (curButton == rightButt) draw_cell(x_pos, y_pos, bulldozer_90);
-          else if (curButton == downButt) draw_cell(x_pos, y_pos, bulldozer_180);
-          else if (curButton == leftButt) draw_cell(x_pos, y_pos, bulldozer_270);
-          else draw_cell(x_pos, y_pos, bulldozer);
-          break;
-
-        default:
-          tft.fillRect(x_pos, y_pos, cell_size, cell_size, BLACK);
-          break;
-      }
+      uint8_t cell_type = level[x][y];
+      draw_cell(x * CELL_SIZE, y * CELL_SIZE, cell_type, curButton);
+      if (cell_type == BOX) box_count++;
     }
   }
 
   if (box_count == 0) {
     tft.setTextSize(3);
-    tft.setCursor(screen_w / 2 - 60, screen_h / 2 - 10);
+    tft.setCursor(tft.width() / 2 - 60, tft.height() / 2 - 10);
     tft.print("VICTORY! " + (String)menuIndex);
+  }
+}
+
+void update_level(uint8_t curButton) {
+  uint8_t last_pos = (undo_pos + UNDO_DEPTH - 1) % UNDO_DEPTH;
+  MoveSnapshot &snap = undo_buffer[last_pos];
+
+  for (uint8_t i = 0; i < snap.count; i++) {
+    uint8_t x, y, prev_val;
+    unpack_change(snap.changes[i], x, y, prev_val);
+    draw_cell(x * CELL_SIZE, y * CELL_SIZE, level[x][y], curButton);
   }
 }
 
