@@ -37,7 +37,6 @@ struct MoveSnapshot {
 
 MoveSnapshot undo_buffer[UNDO_DEPTH];
 uint8_t undo_pos = 0;
-uint8_t undo_size = 0;
 
 // collor
 #define BLACK 0x0000
