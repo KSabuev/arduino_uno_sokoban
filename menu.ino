@@ -1,8 +1,8 @@
 #define VISIBLE_COUNT 7  // сколько уровней влезает на экран
-#define MAX_LEVEL_INDEX sizeof(level_array) / sizeof(level_array[0]) - 1
+#define MAX_LEVEL_INDEX (int16_t)(sizeof(level_array) / sizeof(level_array[0]) - 1)
 
 void menu_action(uint8_t curButton) {
-  static uint16_t lastMenuIndex;
+  static int16_t lastMenuIndex;
   static int16_t scrollOffset = 0;  // смещение прокрутки
 
   // Обработка кнопок
@@ -65,12 +65,13 @@ void menu_action(uint8_t curButton) {
 
     // Выводим уровни, прокручивая их при необходимости
     for (uint16_t i = 0; i < VISIBLE_COUNT; i++) {
-      uint16_t levelNumber = scrollOffset + i;
+      int16_t levelNumber = scrollOffset + i;
       if (levelNumber > MAX_LEVEL_INDEX) break;
       tft.setTextColor(levelNumber == menuIndex ? GREEN : BLUE, BLACK);
       tft.setCursor(40, i * 27 + 45);
       tft.print("Level ");
-      tft.print((String)levelNumber + "  ");
+      tft.print(levelNumber);
+      tft.print("  ");
     }
 
     // Запоминаем последний выбранный уровень

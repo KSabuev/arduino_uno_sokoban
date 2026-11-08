@@ -7,7 +7,7 @@ ILI932X_light tft;
 #define gameMode false
 
 bool mode = menuMode;
-volatile int16_t menuIndex = 0;
+int16_t menuIndex = 0;
 bool flagMenu = false;
 
 // game
@@ -17,7 +17,9 @@ uint8_t level[MAX_LEVEL_SIZE][MAX_LEVEL_SIZE] = {};
 uint8_t player_x;
 uint8_t player_y;
 
-uint8_t size_x, size_y, man_x, man_y;
+uint8_t size_x, size_y;
+
+int16_t offset_x, offset_y;
 
 #define VOID 0       // пусто
 #define WALL 1       // стена
@@ -37,11 +39,6 @@ struct MoveSnapshot {
 
 MoveSnapshot undo_buffer[UNDO_DEPTH];
 uint8_t undo_pos = 0;
-
-// collor
-#define BLACK 0x0000
-#define BLUE 0x001F
-#define GREEN 0x07E0
 
 // button
 #define BUTTON_PIN A5
